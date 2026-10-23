@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#082d50">
+<title>YWS Energia Solar — Dimensionador e Orçamento</title>
+<style>
+:root{--navy:#082d50;--blue:#0879d9;--yellow:#fdb813;--green:#10b981;--bg:#f2f7fb;--ink:#172b3a;--muted:#617689;--line:#dce7ef;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(120deg,#082d50,#0879d9);color:#fff;padding:22px max(16px,calc((100% - 1180px)/2));display:flex;align-items:center;gap:14px}
+.logo{height:50px;width:50px;border-radius:14px;background:var(--yellow);color:var(--navy);display:grid;place-items:center;font-weight:950;font-size:18px}
+header h1{margin:0;font-size:1.35rem}header p{margin:4px 0 0;color:#d7ebfa;font-size:.9rem}
+main{max-width:1180px;margin:auto;padding:22px 16px 44px}.intro{margin:3px 0 20px}.intro h2{margin:0 0 7px;font-size:clamp(1.4rem,3vw,2rem)}.intro p{margin:0;color:var(--muted);line-height:1.5}
+.layout{display:grid;grid-template-columns:minmax(0,1.03fr) minmax(0,.97fr);gap:18px;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 28px #082d500c}.panel h3{margin:0 0 14px;font-size:1.08rem}.section-title{margin:22px 0 8px;padding-top:14px;border-top:1px solid var(--line);font-weight:850;color:var(--navy)}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:16px}.mode{border:1px solid #cad9e5;background:#fff;color:var(--ink);border-radius:10px;padding:10px 5px;font-weight:750;cursor:pointer}.mode.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.field{margin:11px 0}.field label{display:block;font-size:.84rem;font-weight:750;margin-bottom:6px}.field small{display:block;color:var(--muted);font-size:.75rem;line-height:1.4;margin-top:5px}
+input,select{width:100%;min-width:0;padding:11px 12px;border:1px solid #cbdbe7;border-radius:10px;background:#fff;color:var(--ink);font:inherit}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.hidden{display:none!important}
+.btn{width:100%;border:0;border-radius:11px;background:var(--blue);color:#fff;font-weight:850;font-size:1rem;padding:13px;cursor:pointer;margin-top:8px}.btn.green{background:#07875f}.btn.secondary{background:var(--navy)}.note{font-size:.78rem;line-height:1.5;color:var(--muted);margin:12px 0 0}
+.result-hero{background:linear-gradient(130deg,#0879d9,#082d50);color:#fff;border-radius:15px;padding:18px;margin-bottom:13px}.eyebrow{font-size:.78rem;color:#d4eaff}.hero-price{font-size:clamp(1.8rem,4vw,2.35rem);font-weight:900;margin:5px 0}.hero-sub{font-size:.9rem;color:#e0f0ff}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}.stat{background:#f6f9fc;border:1px solid #e2ebf2;border-radius:12px;padding:13px}.stat span{display:block;font-size:.76rem;color:var(--muted);margin-bottom:6px}.stat strong{font-size:1.12rem;overflow-wrap:anywhere}.stat small{display:block;color:var(--muted);font-size:.73rem;margin-top:5px;line-height:1.35}
+.costs{margin-top:14px;border:1px solid var(--line);border-radius:12px;overflow:hidden}.costrow{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:.86rem}.costrow:last-child{border-bottom:0}.costrow.total{font-weight:900;background:#edf7ff;color:var(--navy)}.costrow span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.warning{margin-top:12px;padding:11px 12px;border-left:4px solid #e8a43b;border-radius:7px;background:#fff7e8;font-size:.82rem;line-height:1.45}.good{border-color:var(--green);background:#edfff8}.footer{font-size:.74rem;color:var(--muted);line-height:1.5;margin-top:14px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.panel{padding:16px}header{padding:17px 15px}.modes{gap:5px}.mode{font-size:.78rem}}
+</style>
+</head>
+<body>
+<header><div class="logo">YWS</div><div><h1>YWS Energia Solar</h1><p>Dimensionamento fotovoltaico e orçamento preliminar</p></div></header>
+<main>
+  <div class="intro"><h2>Monte um orçamento com os custos do seu catálogo</h2><p>O investimento é calculado a partir dos preços de painéis, inversores, estrutura e mão de obra cadastrados — não por um preço genérico por kWp.</p></div>
+  <div class="layout">
+    <section class="panel">
+      <h3>1. Dados da instalação</h3>
+      <div class="modes">
+        <button class="mode active" data-mode="bill">Valor da conta</button>
+        <button class="mode" data-mode="consumption">Consumo (kWh)</button>
+        <button class="mode" data-mode="roof">Área disponível</button>
+      </div>
+      <div id="billFields"><div class="field"><label for="bill">Conta de luz média (R$/mês)</label><input id="bill" type="number" min="0" step="10" value="450"><small>De preferência, use a média dos últimos 3 a 12 meses.</small></div></div>
+      <div id="consumptionFields" class="hidden"><div class="field"><label for="consumption">Consumo médio (kWh/mês)</label><input id="consumption" type="number" min="0" step="10" value="450"></div></div>
+      <div id="roofFields" class="hidden">
+        <div class="grid2"><div class="field"><label for="roof">Área disponível (m²)</label><input id="roof" type="number" min="0" step="1" value="30"></div><div class="field"><label for="surface">Instalação</label><select id="surface"><option value="roof">Telhado (2,5 m²/painel)</option><option value="ground">Solo (3 m²/painel)</option></select></div></div>
+        <div class="field"><label for="goalBill">Conta de luz média (opcional, R$)</label><input id="goalBill" type="number" min="0" step="10" placeholder="Ex.: 450"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="tariff">Tarifa (R$/kWh)</label><input id="tariff" type="number" min="0.01" step="0.01" value="0.95"></div>
+        <div class="field"><label for="hsp">Horas de sol pico/dia</label><input id="hsp" type="number" min="1" max="8" step="0.1" value="5.2"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="panelW">Modelo de painel</label><select id="panelW">
+          <option value="585">585 Wp — R$ 468</option><option value="605">605 Wp — R$ 484</option><option value="610">610 Wp — R$ 488</option><option value="615">615 Wp — R$ 492</option><option value="620" selected>620 Wp — R$ 520</option><option value="700">700 Wp — R$ 600</option><option value="710">710 Wp — R$ 650</option><option value="720">720 Wp — R$ 700</option>
+        </select></div>
+        <div class="field"><label for="loss">Perdas estimadas (%)</label><input id="loss" type="number" min="0" max="50" step="1" value="20"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="usable">Área aproveitável (%)</label><input id="usable" type="number" min="10" max="100" step="5" value="85"></div>
+        <div class="field"><label for="margin">Margem bruta desejada (%)</label><input id="margin" type="number" min="0" max="80" step="1" value="30"><small>Preço de venda = custo ÷ (1 − margem). Não é acréscimo sobre custo.</small></div>
+      </div>
+
+      <div class="section-title">2. Custos e materiais</div>
+      <div class="field"><label for="inverter">Inversor sugerido (preço cadastrado)</label><select id="inverter"></select><small>O sistema sugere automaticamente o primeiro inversor com potência igual ou superior à potência calculada. Você pode alterar manualmente.</small></div>
+      <div class="grid2">
+        <div class="field"><label for="structure">Tipo de fixação</label><select id="structure"><option value="metal">Kit fibrocimento — parafuso inox metal M10x250 (R$ 120)</option><option value="wood">Kit fibrocimento — parafuso inox madeira (R$ 120)</option><option value="micro">Suporte L microinversor (2 un.) — R$ 19,90</option></select></div>
+        <div class="field"><label for="kitsPerPanel">Kits de fixação por painel</label><input id="kitsPerPanel" type="number" min="0" step="0.25" value="0.25"><small>Estimativa inicial de 1 kit para cada 4 painéis; ajuste conforme o kit vendido pelo fornecedor.</small></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="railPerPanel">Perfis de 2,70 m por painel</label><input id="railPerPanel" type="number" min="0" step="0.05" value="0.75"><small>Estimativa editável para orçamento preliminar.</small></div>
+        <div class="field"><label for="splicePerRail">Emendas por perfil</label><input id="splicePerRail" type="number" min="0" step="0.1" value="0.5"><small>Quantidade estimada; revise conforme o arranjo dos trilhos.</small></div>
+        <div class="field"><label for="splicePrice">Preço da emenda (R$/un.)</label><input id="splicePrice" type="number" min="0" step="0.5" value="0"><small>Não informado na tabela original; preencha com o valor do fornecedor.</small></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="laborRate">Mão de obra por painel (R$)</label><input id="laborRate" type="number" min="0" step="5" value="180"><small>Catálogo informado: R$ 180 abaixo de 60 painéis e R$ 140 acima de 60.</small></div>
+        <div class="field"><label for="extras">Outros materiais/frete (R$)</label><input id="extras" type="number" min="0" step="50" value="0"><small>Inclua cabos, proteções, frete, impostos ou despesas não listadas.</small></div>
+      </div>
+      <button class="btn" id="calculate">Calcular orçamento</button>
+      <p class="note">Os preços de materiais são os valores cadastrados no projeto. As quantidades de fixação e trilhos são estimativas editáveis, porque variam conforme o telhado, a disposição dos módulos e o projeto técnico.</p>
+    </section>
+
+    <section class="panel" aria-live="polite">
+      <h3>3. Resultado estimado</h3>
+      <div class="result-hero"><div class="eyebrow">PREÇO DE VENDA SUGERIDO</div><div class="hero-price" id="salePrice">—</div><div class="hero-sub" id="systemSize">Sistema: — kWp</div></div>
+      <div class="stats">
+        <div class="stat"><span>Painéis necessários</span><strong id="panels">—</strong><small id="panelDesc">módulos fotovoltaicos</small></div>
+        <div class="stat"><span>Geração estimada</span><strong id="generation">—</strong><small>kWh por mês</small></div>
+        <div class="stat"><span>Área estimada dos módulos</span><strong id="area">—</strong><small>m², sem folgas adicionais</small></div>
+        <div class="stat"><span>Custo total estimado</span><strong id="totalCost">—</strong><small>materiais + mão de obra + extras</small></div>
+        <div class="stat"><span>Lucro bruto estimado</span><strong id="profit">—</strong><small>antes de despesas não incluídas</small></div>
+        <div class="stat"><span>Economia bruta mensal</span><strong id="savings">—</strong><small id="annual">— por ano</small></div>
+        <div class="stat"><span>Retorno simples estimado</span><strong id="payback">—</strong><small>preço de venda ÷ economia bruta anual</small></div>
+        <div class="stat"><span>Cobertura estimada</span><strong id="coverage">—%</strong><small>da meta de consumo informada</small></div>
+      </div>
+      <div class="section-title">Composição do custo</div>
+      <div class="costs">
+        <div class="costrow"><span>Painéis</span><span id="panelCost">—</span></div>
+        <div class="costrow"><span>Inversor</span><span id="inverterCost">—</span></div>
+        <div class="costrow"><span>Kits de fixação</span><span id="fixCost">—</span></div>
+        <div class="costrow"><span>Perfis de 2,70 m</span><span id="railCost">—</span></div>
+        <div class="costrow"><span>Emendas de trilho</span><span id="spliceCost">—</span></div>
+        <div class="costrow"><span>Mão de obra</span><span id="laborCost">—</span></div>
+        <div class="costrow"><span>Outros materiais/frete</span><span id="extrasCost">—</span></div>
+        <div class="costrow total"><span>Custo total</span><span id="costTotalLine">—</span></div>
+        <div class="costrow total"><span>Preço de venda sugerido</span><span id="saleLine">—</span></div>
+      </div>
+      <div class="warning" id="warning">Preencha os dados e calcule para ver o resultado.</div>
+      <button class="btn green" id="share">Copiar resumo do orçamento</button>
+      <button class="btn secondary" id="print">Imprimir / salvar em PDF</button>
+      <p class="footer">Estimativa preliminar, não substitui vistoria, projeto elétrico, avaliação estrutural nem conferência das regras da distribuidora. Economia real pode ser menor por custo de disponibilidade, Fio B, impostos, perfil de consumo e condições locais. Confirme a compatibilidade do inversor e os custos de todos os componentes antes de apresentar ao cliente.</p>
+    </section>
+  </div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let mode='bill', inverterManual=false;
+const panelsPrice={585:468,605:484,610:488,615:492,620:520,700:600,710:650,720:700};
+const inverters=[
+ {kw:2.5,label:'Microinversor 2,5 kW',price:1200},
+ {kw:3,label:'Inversor 3 kW',price:1500},
+ {kw:6,label:'Inversor 6 kW',price:2000},
+ {kw:7.5,label:'Inversor 7,5 kW',price:2500},
+ {kw:10,label:'Inversor 10 kW',price:3000},
+ {kw:15,label:'Inversor 15 kW',price:3200},
+ {kw:25,label:'Inversor 25 kW',price:4400},
+ {kw:30,label:'Inversor 30 kW',price:7800},
+ {kw:50,label:'Inversor 50 kW',price:9500},
+ {kw:75,label:'Inversor 75 kW',price:16000},
+ {kw:100,label:'Inversor 100 kW',price:19000}
+];
+const fmt=(n,d=0)=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2});
+function populateInverters(){
+ $('inverter').innerHTML=inverters.map((i,idx)=>`<option value="${idx}">${i.label} — ${money(i.price)}</option>`).join('');
+}
+populateInverters();
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{
+ mode=b.dataset.mode;
+ document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));
+ $('billFields').classList.toggle('hidden',mode!=='bill');
+ $('consumptionFields').classList.toggle('hidden',mode!=='consumption');
+ $('roofFields').classList.toggle('hidden',mode!=='roof');
+ calc();
+}));
+$('inverter').addEventListener('change',()=>{inverterManual=true;calc()});
+$('panelW').addEventListener('change',()=>{inverterManual=false;calc()});
+$('surface').addEventListener('change',()=>{if($('surface').value==='ground')$('panelAreaHint')?.remove();calc()});
+function numInput(id, fallback=0){const el=$(id);if(!el)return fallback;const v=parseFloat(el.value);return Number.isFinite(v)?v:fallback}
+function calc(){
+ const tariff=Math.max(.01,numInput('tariff',.95)),hsp=Math.max(1,Math.min(8,numInput('hsp',5.2)));
+ const loss=Math.max(0,Math.min(50,numInput('loss',20)))/100,usable=Math.max(10,Math.min(100,numInput('usable',85)))/100;
+ const panelW=Number($('panelW').value),panelPrice=panelsPrice[panelW]||520;
+ const pArea=$('surface').value==='ground'?3:2.5;
+ const yieldPerKwp=hsp*30*(1-loss);
+ let target=0,roofPanels=Infinity,roofMode=mode==='roof';
+ if(mode==='bill')target=Math.max(0,numInput('bill',0))/tariff;
+ if(mode==='consumption')target=Math.max(0,numInput('consumption',0));
+ if(mode==='roof'){
+   const roof=Math.max(0,numInput('roof',0));
+   roofPanels=Math.floor(roof*usable/pArea);
+   const bill=Math.max(0,numInput('goalBill',0));
+   target=bill>0?bill/tariff:0;
+ }
+ let neededKwp=target>0?target/yieldPerKwp:0;
+ let count=target>0?Math.ceil(neededKwp*1000/panelW):0;
+ if(roofMode)count=target>0?Math.min(count,roofPanels):roofPanels;
+ count=Math.max(0,Number.isFinite(count)?count:0);
+ const kwp=count*panelW/1000,gen=kwp*yieldPerKwp,area=count*pArea;
+ const neededInv=Math.max(.1,kwp);
+ let invIndex=inverters.findIndex(i=>i.kw>=neededInv);
+ if(invIndex<0)invIndex=inverters.length-1;
+ if(!inverterManual)$('inverter').value=String(invIndex);
+ const inv=inverters[Number($('inverter').value)]||inverters[invIndex];
+ let structurePrice=Number($('structure').value==='micro'?19.9:120);
+ const kits=Math.ceil(count*Math.max(0,numInput('kitsPerPanel',2)));
+ const rails=Math.ceil(count*Math.max(0,numInput('railPerPanel',.75)));
+ const splices=Math.ceil(rails*Math.max(0,numInput('splicePerRail',.5)));
+ const spliceUnitPrice=Math.max(0,numInput('splicePrice',0));
+ const panelCost=count*panelPrice,invCost=inv.price,fixCost=kits*structurePrice,railCost=rails*75,spliceCost=splices*spliceUnitPrice;
+ let laborRate=Math.max(0,numInput('laborRate',180));
+ // Apply the user's stated labor rule automatically unless the user edits the field after selecting a value.
+ if(count>60 && $('laborRate').dataset.manual!=='1'){laborRate=140;$('laborRate').value=140}
+ else if(count<=60 && $('laborRate').dataset.manual!=='1'){$('laborRate').value=180}
+ const laborCost=count*laborRate,extras=Math.max(0,numInput('extras',0));
+ const total=panelCost+invCost+fixCost+railCost+spliceCost+laborCost+extras;
+ const margin=Math.max(0,Math.min(80,numInput('margin',30)))/100;
+ const sale=margin<1?total/(1-margin):total,profit=sale-total;
+ const consumption=target>0?target:gen,coverage=consumption>0?Math.min(100,gen/consumption*100):0,savings=gen*tariff;
+ const payback=savings>0?sale/(savings*12):0;
+ $('salePrice').textContent=money(sale);$('systemSize').textContent=`Sistema: ${fmt(kwp,2)} kWp • inversor selecionado: ${inv.label}`;
+ $('panels').textContent=fmt(count);$('panelDesc').textContent=`módulos de ${panelW} Wp • ${money(panelPrice)} cada`;
+ $('generation').textContent=fmt(gen);$('area').textContent=fmt(area,1)+' m²';$('totalCost').textContent=money(total);$('profit').textContent=money(profit);
+ $('savings').textContent=money(savings);$('annual').textContent=money(savings*12)+' por ano (bruto)';$('payback').textContent=savings>0?fmt(payback,1)+' anos':'—';$('coverage').textContent=fmt(coverage,0)+'%';
+ $('panelCost').textContent=money(panelCost);$('inverterCost').textContent=money(invCost);$('fixCost').textContent=`${fmt(kits)} un. × ${money(structurePrice)} = ${money(fixCost)}`;
+ $('railCost').textContent=`${fmt(rails)} un. × R$ 75,00 = ${money(railCost)}`;$('spliceCost').textContent=`${fmt(splices)} un. × ${money(spliceUnitPrice)} = ${money(spliceCost)}`;
+ $('laborCost').textContent=`${fmt(count)} × ${money(laborRate)} = ${money(laborCost)}`;$('extrasCost').textContent=money(extras);
+ $('costTotalLine').textContent=money(total);$('saleLine').textContent=money(sale);
+ let warning='Estimativa inicial: confirme os preços atuais, a compatibilidade do inversor, o padrão elétrico, o sombreamento e a estrutura antes de fechar o orçamento.';
+ if(roofMode && target>0 && gen<target)warning=`A área informada comporta até ${fmt(roofPanels)} painéis, mas a meta de consumo exige mais. A geração estimada fica ${fmt(target-gen)} kWh/mês abaixo da meta.`;
+ else if(roofMode && count===0)warning='A área informada não comporta painéis com os parâmetros selecionados. Confira a metragem e a área aproveitável.';
+ else if(kwp>100)warning='A potência calculada supera 100 kWp. O maior inversor cadastrado é de 100 kW; pode ser necessário dividir o sistema em vários inversores.';
+ else if(count>0)warning=`Orçamento preliminar para ${count} painéis. Quantidades de kits, trilhos e emendas são estimativas editáveis; valide conforme o projeto e o tipo de telhado.`;
+ $('warning').textContent=warning;
+}
+$('laborRate').addEventListener('input',()=>{$('laborRate').dataset.manual='1';calc()});
+$('structure').addEventListener('change',calc);
+document.querySelectorAll('input,select').forEach(el=>{if(!['inverter','panelW','structure','surface'].includes(el.id))el.addEventListener('input',calc)});
+$('calculate').addEventListener('click',calc);
+$('share').addEventListener('click',()=>{
+ const summary=`YWS Energia Solar — Orçamento preliminar\nPotência: ${$('systemSize').textContent}\nPainéis: ${$('panels').textContent} x ${$('panelDesc').textContent}\nGeração estimada: ${$('generation').textContent} kWh/mês\nÁrea estimada: ${$('area').textContent}\nCusto estimado: ${$('totalCost').textContent}\nPreço de venda sugerido: ${$('salePrice').textContent}\nLucro bruto estimado: ${$('profit').textContent}\nEconomia bruta mensal: ${$('savings').textContent}\nRetorno simples: ${$('payback').textContent}\n\nComposição:\nPainéis: ${$('panelCost').textContent}\nInversor: ${$('inverterCost').textContent}\nFixação: ${$('fixCost').textContent}\nPerfis: ${$('railCost').textContent}\nEmendas: ${$('spliceCost').textContent}\nMão de obra: ${$('laborCost').textContent}\nOutros/frete: ${$('extrasCost').textContent}\n\n${$('warning').textContent}\nEstimativa preliminar sujeita a vistoria e projeto técnico.`;
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(summary).then(()=>{$('share').textContent='Resumo copiado!';setTimeout(()=>$('share').textContent='Copiar resumo do orçamento',1800)}).catch(()=>prompt('Copie o resumo abaixo:',summary));
+ else prompt('Copie o resumo abaixo:',summary);
+});
+$('print').addEventListener('click',()=>window.print());
+calc();
+</script>
+</body>
+</html>
